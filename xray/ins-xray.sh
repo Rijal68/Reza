@@ -60,10 +60,7 @@ chmod +x /root/.acme.sh/acme.sh
 ~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
 echo -e "[ ${green}INFO${NC} ] Renew cert done... "
 sleep 5
-rm -rf /root/.acme.sh >/dev/null 2>&1
-echo -e "[ ${green}INFO${NC} ] Renew cert done... "
 
-service squid start
 uuid1=$(cat /proc/sys/kernel/random/uuid)
 uuid2=$(cat /proc/sys/kernel/random/uuid)
 uuid3=$(cat /proc/sys/kernel/random/uuid)
@@ -345,10 +342,11 @@ cat > /etc/xray/config.json << END
 END
 
 # / / Installation Xray Service
+rm -rf /etc/systemd/system/xray.service.d
 cat > /etc/systemd/system/xray.service << END
 [Unit]
-Description=Xray Service By FERI
-Documentation=https://t.me/FER1DEV
+Description=Xray Service 
+Documentation=Reza Procontrol
 After=network.target nss-lookup.target
 
 [Service]
