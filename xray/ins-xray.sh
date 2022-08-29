@@ -28,25 +28,19 @@ chronyc sourcestats -v
 chronyc tracking -v
 date
 
-# / / Ambil Xray Core Version Terbaru
-latest_version="$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases | grep tag_name | sed -E 's/.*"v(.*)".*/\1/' | head -n 1)"
-
-# / / Installation Xray Core
-xraycore_link="https://github.com/XTLS/Xray-core/releases/download/v$latest_version/xray-linux-64.zip"
-
-# / / Make Main Directory
-mkdir -p /usr/bin/xray
 mkdir -p /etc/xray
-
-# / / Unzip Xray Linux 64
-cd `mktemp -d`
-curl -sL "$xraycore_link" -o xray.zip
-unzip -q xray.zip && rm -rf xray.zip
-mv xray /usr/local/bin/xray
-chmod +x /usr/local/bin/xray
-
+# / / Ambil Xray Core Version Terbaru
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u www-data --version 1.5.9
 # Make Folder XRay
 mkdir -p /var/log/xray/
+#mekiemebm
+chown www-data.www-data /var/log/xray
+chown www-data.www-data /etc/xray
+chmod +x /var/log/xray
+touch /var/log/xray/access.log
+touch /var/log/xray/error.log
+touch /var/log/xray/access2.log
+touch /var/log/xray/error2.log
 
 echo -e "[ ${red}WARNING${NC} ] Detected port 80 used by $Cek " 
 systemctl stop $Cek
@@ -57,17 +51,16 @@ fi
 echo -e "[ ${green}INFO${NC} ] Starting renew cert... " 
 sleep 2
 echo -e "[ ${green}INFO$NC ] Getting acme for cert"
-wget autosc.me/acme.sh >/dev/null 2>&1
-bash acme.sh --install >/dev/null 2>&1
-bash acme.sh --register-account -m admin@fsidvpn.live
-wget https://get.acme.sh >/dev/null 2>&1 | sh -s email=admin@fsidvpn.live
-/root/.acme.sh/acme.sh --upgrade --auto-upgrade >/dev/null 2>&1
-/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt >/dev/null 2>&1
-/root/.acme.sh/acme.sh --issue -d $domain --standalone --force --keylength ec-256
-/root/.acme.sh/acme.sh --installcert -d $domain --ecc --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key
+mkdir -p /root/.acme.sh
+curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+chmod +x /root/.acme.sh/acme.sh
+/root/.acme.sh/acme.sh --upgrade --auto-upgrade
+/root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+/root/.acme.sh/acme.sh --issue -d $domain --standalone -k ec-256
+~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
 echo -e "[ ${green}INFO${NC} ] Renew cert done... "
 sleep 5
-rm acme.sh >/dev/null 2>&1
+rm -rf /root/.acme.sh >/dev/null 2>&1
 echo -e "[ ${green}INFO${NC} ] Renew cert done... "
 
 service squid start
